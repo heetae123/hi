@@ -39,7 +39,7 @@
     .profile-avatar {
       width: 80px;
       height: 80px;
-      background: linear-gradient(135deg, #e8f0fe, #1a73e8);
+      background: linear-gradient(135deg, #fff8e1, #fbbc04);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -75,7 +75,7 @@
       margin-bottom: 4px;
     }
     .status-item .count {
-      color: #1a73e8;
+      color: #fbbc04;
       font-weight: bold;
       font-size: 16px;
     }
@@ -168,14 +168,6 @@
         <div class="arrow">›</div>
       </div>
       
-      <div class="menu-item" onclick="goToPage('orders')">
-        <div class="content">
-          <div class="icon">📋</div>
-          <div>거래 내역</div>
-        </div>
-        <div class="arrow">›</div>
-      </div>
-      
       <div class="menu-item" onclick="goToPage('quotes')">
         <div class="content">
           <div class="icon">💬</div>
@@ -245,9 +237,6 @@
       switch(page) {
         case 'profile':
           alert('내 정보 관리 페이지로 이동합니다.');
-          break;
-        case 'orders':
-          alert('거래 내역 페이지로 이동합니다.');
           break;
         case 'quotes':
           alert('견적 문의 내역 페이지로 이동합니다.');

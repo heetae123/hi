@@ -5,7 +5,7 @@ const urlsToCache = [
   "/search.html",
   "/manifest.json",
   "/icons/icon-192.png",
-  "/icons/icon-512.png"
+  "/icons/icon.jpg"
   // 폰트 캐싱은 복잡성을 유발할 수 있으므로 초기 단계에서는 제외하는 것이 안정적입니다.
 ];
 
