@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중기모여 - 5단계 장비 매칭</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Google Fonts - Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+
+        .mobile-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 60px 24px 40px;
+            text-align: center;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .step-indicator {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .main-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #212529;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #6c757d;
+            line-height: 1.4;
+            font-weight: 400;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            padding: 0 24px;
+            margin-bottom: 40px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            border-radius: 2px;
+            width: 20%;
+            transition: width 0.8s ease;
+        }
+
+        /* Main Content */
+        .content {
+            padding: 0 24px 120px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-card:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 123, 255, 0.12);
+        }
+
+        .option-card.selected {
+            border-color: #007bff;
+            background: #f8fafe;
+        }
+
+        .option-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            color: #007bff;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .option-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .option-icon {
+            width: 48px;
+            height: 48px;
+            background: #f1f3f4;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+        }
+
+        .option-card.selected .option-icon {
+            background: #e3f2fd;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        .option-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 4px;
+        }
+
+        .option-desc {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.4;
+            font-weight: 400;
+        }
+
+        /* Input styles for step 4 and 5 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        /* Date picker styles */
+        .date-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .date-column {
+            flex: 1;
+        }
+
+        .date-sub-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .date-input {
+            font-size: 16px !important;
+            height: 52px;
+            text-align: center;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .date-help-text {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .checkbox-group {
+            margin-top: 24px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #007bff;
+        }
+
+        .checkbox-item.selected {
+            border-color: #007bff;
+            background: #f8fafe;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 4px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item.selected .checkbox {
+            background: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+
+        /* Summary styles for step 5 */
+        .summary-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .summary-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 16px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .summary-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .price-highlight {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .price-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .price-amount {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* Bottom Action */
+        .bottom-action {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 375px;
+            width: 100%;
+            background: white;
+            padding: 16px 24px 32px;
+            border-top: 1px solid #f1f3f4;
+        }
+
+        .continue-btn {
+            width: 100%;
+            height: 56px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .continue-btn.active {
+            background: #007bff;
+        }
+
+        .continue-btn.active:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .continue-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            background: white;
+            z-index: 10;
+        }
+
+        .back-btn {
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #f1f3f4;
+        }
+
+        .nav-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+
+        .content-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .header-transition {
+            transition: all 0.4s ease;
+        }
+
+        .option-card, .input-group, .summary-card {
+            animation: slideUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .option-card:nth-child(1) { animation-delay: 0.1s; }
+        .option-card:nth-child(2) { animation-delay: 0.2s; }
+        .option-card:nth-child(3) { animation-delay: 0.3s; }
+        .option-card:nth-child(4) { animation-delay: 0.4s; }
+        .option-card:nth-child(5) { animation-delay: 0.5s; }
+        .option-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .input-group:nth-child(1) { animation-delay: 0.1s; }
+        .input-group:nth-child(2) { animation-delay: 0.2s; }
+        .input-group:nth-child(3) { animation-delay: 0.3s; }
+
+        .summary-card { animation-delay: 0.1s; }
+        .checkbox-group { animation-delay: 0.2s; }
+
+        /* Responsive */
+        @media (max-width: 375px) {
+            .mobile-container {
+                max-width: 100%;
+            }
+
+            .bottom-action {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <button class="back-btn" onclick="goBack()">←</button>
+            <div class="nav-title" id="navTitle">장비 선택</div>
+            <div style="width: 32px;"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="step-indicator" id="stepIndicator">1/5 단계</div>
+            <h1 class="main-title" id="mainTitle">어떤 장비가<br>필요하신가요?</h1>
+            <p class="subtitle" id="subtitle">작업에 맞는 중장비 종류를 선택해주세요</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content" id="mainContent">
+            <!-- Step content will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Bottom Action -->
+        <div class="bottom-action">
+            <button class="continue-btn" id="continueBtn" onclick="nextStep()">
+                다음 단계
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                .register("/service-worker.js")
+                .then((reg) => console.log("✅ Service Worker registered:", reg.scope))
+                .catch((err) => console.error("❌ Service Worker registration failed:", err));
+            });
+        }
+
+        // Application state
+        let currentStep = 1;
+        let formData = {
+            equipment: null,
+            size: null,
+            location: null,
+            startDate: null,
+            endDate: null,
+            address: null,
+            phone: null,
+            services: []
+        };
+
+        // Step configurations
+        const stepConfigs = {
+            1: {
+                title: "어떤 장비가<br>필요하신가요?",
+                subtitle: "작업에 맞는 중장비 종류를 선택해주세요",
+                navTitle: "장비 선택"
+            },
+            2: {
+                title: "어떤 크기가<br>필요하신가요?",
+                subtitle: "작업 규모에 맞는 장비 크기를 선택해주세요",
+                navTitle: "크기 선택"
+            },
+            3: {
+                title: "어느 지역에서<br>사용하시나요?",
+                subtitle: "작업 현장 위치를 선택해주세요",
+                navTitle: "지역 선택"
+            },
+            4: {
+                title: "언제, 어디서<br>사용하시나요?",
+                subtitle: "사용 기간과 상세 주소를 입력해주세요",
+                navTitle: "기간/주소 입력"
+            },
+            5: {
+                title: "견적 요청을<br>완료해주세요",
+                subtitle: "선택사항을 확인하고 최종 견적을 요청하세요",
+                navTitle: "견적 요청"
+            }
+        };
+
+        // Initialize app
+        function init() {
+            updateProgress();
+            loadStep(currentStep);
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const percentage = (currentStep / 5) * 100;
+            progressFill.style.width = percentage + '%';
+        }
+
+        // Update header content
+        function updateHeader(step) {
+            const config = stepConfigs[step];
+            document.getElementById('stepIndicator').textContent = `${step}/5 단계`;
+            document.getElementById('mainTitle').innerHTML = config.title;
+            document.getElementById('subtitle').textContent = config.subtitle;
+            document.getElementById('navTitle').textContent = config.navTitle;
+        }
+
+        // Load step content
+        function loadStep(step) {
+            updateHeader(step);
+            const content = document.getElementById('mainContent');
+
+            switch(step) {
+                case 1: content.innerHTML = getStep1Content(); break;
+                case 2: content.innerHTML = getStep2Content(); break;
+                case 3: content.innerHTML = getStep3Content(); break;
+                case 4: content.innerHTML = getStep4Content(); break;
+                case 5: content.innerHTML = getStep5Content(); break;
+            }
+
+            updateContinueButton();
+        }
+
+        // Step 1: Equipment Type
+        function getStep1Content() {
+            return `
+                <div class="options-grid">
+                    <div class="option-card ${formData.equipment === 'excavator' ? 'selected' : ''}" onclick="selectOption(this, 'equipment', 'excavator')">
+                        <div class="option-header"><div class="option-icon">🚜</div><div class="option-text"><div class="option-title">굴삭기</div><div class="option-desc">토목공사, 건설현장 작업</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.equipment === 'crane' ? 'selected' : ''}" onclick="selectOption(this, 'equipment', 'crane')">
+                        <div class="option-header"><div class="option-icon">🏗️</div><div class="option-text"><div class="option-title">크레인</div><div class="option-desc">고층건물, 중량물 운반작업</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.equipment === 'bulldozer' ? 'selected' : ''}" onclick="selectOption(this, 'equipment', 'bulldozer')">
+                        <div class="option-header"><div class="option-icon">🚧</div><div class="option-text"><div class="option-title">불도저</div><div class="option-desc">토지정리, 도로공사</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.equipment === 'forklift' ? 'selected' : ''}" onclick="selectOption(this, 'equipment', 'forklift')">
+                        <div class="option-header"><div class="option-icon">🚛</div><div class="option-text"><div class="option-title">지게차</div><div class="option-desc">물류창고, 자재운반</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.equipment === 'loader' ? 'selected' : ''}" onclick="selectOption(this, 'equipment', 'loader')">
+                        <div class="option-header"><div class="option-icon">⚙️</div><div class="option-text"><div class="option-title">로더</div><div class="option-desc">자재 적재 및 운반작업</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.equipment === 'other' ? 'selected' : ''}" onclick="selectOption(this, 'equipment', 'other')">
+                        <div class="option-header"><div class="option-icon">🛠️</div><div class="option-text"><div class="option-title">기타 장비</div><div class="option-desc">롤러, 스크래퍼, 그레이더 등</div></div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Step 2: Size Selection
+        function getStep2Content() {
+            return `
+                <div class="options-grid">
+                    <div class="option-card ${formData.size === 'small' ? 'selected' : ''}" onclick="selectOption(this, 'size', 'small')">
+                        <div class="option-header"><div class="option-icon">📏</div><div class="option-text"><div class="option-title">소형 (5톤 미만)</div><div class="option-desc">좁은 공간, 소규모 작업</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.size === 'medium' ? 'selected' : ''}" onclick="selectOption(this, 'size', 'medium')">
+                        <div class="option-header"><div class="option-icon">📐</div><div class="option-text"><div class="option-title">중형 (5-15톤)</div><div class="option-desc">일반적인 건설현장</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.size === 'large' ? 'selected' : ''}" onclick="selectOption(this, 'size', 'large')">
+                        <div class="option-header"><div class="option-icon">📊</div><div class="option-text"><div class="option-title">대형 (15톤 이상)</div><div class="option-desc">대규모 토목공사</div></div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Step 3: Location Selection
+        function getStep3Content() {
+            return `
+                <div class="options-grid">
+                    <div class="option-card ${formData.location === 'seoul' ? 'selected' : ''}" onclick="selectOption(this, 'location', 'seoul')">
+                        <div class="option-header"><div class="option-icon">🏙️</div><div class="option-text"><div class="option-title">서울·경기</div><div class="option-desc">서울, 인천, 경기도</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.location === 'chungcheong' ? 'selected' : ''}" onclick="selectOption(this, 'location', 'chungcheong')">
+                        <div class="option-header"><div class="option-icon">🏞️</div><div class="option-text"><div class="option-title">충청권</div><div class="option-desc">대전, 충북, 충남</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.location === 'gyeongsang' ? 'selected' : ''}" onclick="selectOption(this, 'location', 'gyeongsang')">
+                        <div class="option-header"><div class="option-icon">🏔️</div><div class="option-text"><div class="option-title">경상권</div><div class="option-desc">부산, 대구, 경북, 경남</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.location === 'jeolla' ? 'selected' : ''}" onclick="selectOption(this, 'location', 'jeolla')">
+                        <div class="option-header"><div class="option-icon">🌾</div><div class="option-text"><div class="option-title">전라권</div><div class="option-desc">광주, 전북, 전남</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.location === 'gangwon' ? 'selected' : ''}" onclick="selectOption(this, 'location', 'gangwon')">
+                        <div class="option-header"><div class="option-icon">⛰️</div><div class="option-text"><div class="option-title">강원권</div><div class="option-desc">강원도</div></div></div>
+                    </div>
+                    <div class="option-card ${formData.location === 'jeju' ? 'selected' : ''}" onclick="selectOption(this, 'location', 'jeju')">
+                        <div class="option-header"><div class="option-icon">🏝️</div><div class="option-text"><div class="option-title">제주권</div><div class="option-desc">제주도</div></div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Step 4: Date & Address Selection
+        function getStep4Content() {
+            const today = new Date().toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 90);
+            const maxDateStr = maxDate.toISOString().split('T')[0];
+
+            return `
+                <div class="input-group">
+                    <label class="input-label">장비 사용 기간</label>
+                    <div class="date-row">
+                        <div class="date-column">
+                            <div class="date-sub-label">시작일</div>
+                            <input type="date" class="input-field date-input" id="startDate"
+                                   value="${formData.startDate || ''}" min="${today}" max="${maxDateStr}"
+                                   onchange="handleDateChange('startDate', this.value)">
+                        </div>
+                        <div class="date-column">
+                            <div class="date-sub-label">종료일</div>
+                            <input type="date" class="input-field date-input" id="endDate"
+                                   value="${formData.endDate || ''}" min="${formData.startDate || today}" max="${maxDateStr}"
+                                   ${!formData.startDate ? 'disabled' : ''}
+                                   onchange="handleDateChange('endDate', this.value)">
+                        </div>
+                    </div>
+                    <div class="date-help-text">오늘부터 최대 90일까지 선택 가능</div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">작업 현장 상세 주소</label>
+                    <input type="text" class="input-field" placeholder="예: 서울시 강남구 테헤란로 123"
+                           value="${formData.address || ''}" oninput="updateFormData('address', this.value)">
+                    <div class="date-help-text">정확한 주소를 입력해주세요 (운송비 계산용)</div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">연락처</label>
+                    <input type="tel" class="input-field" placeholder="예: 010-1234-5678"
+                           value="${formData.phone || ''}" oninput="updateFormData('phone', this.value)">
+                    <div class="date-help-text">견적 안내를 위한 연락처입니다</div>
+                </div>
+            `;
+        }
+
+        // Step 5: Additional Services & Summary
+        function getStep5Content() {
+            const equipmentNames = { excavator: '굴삭기', crane: '크레인', bulldozer: '불도저', forklift: '지게차', loader: '로더', other: '기타 장비' };
+            const sizeNames = { small: '소형 (5톤 미만)', medium: '중형 (5-15톤)', large: '대형 (15톤 이상)' };
+            const locationNames = { seoul: '서울·경기', chungcheong: '충청권', gyeongsang: '경상권', jeolla: '전라권', gangwon: '강원권', jeju: '제주권' };
+
+            return `
+                <div class="summary-card">
+                    <div class="summary-title">요청하신 견적 정보</div>
+                    <div class="summary-item"><span class="summary-label">장비 종류</span><span class="summary-value">${equipmentNames[formData.equipment] || '-'}</span></div>
+                    <div class="summary-item"><span class="summary-label">장비 크기</span><span class="summary-value">${sizeNames[formData.size] || '-'}</span></div>
+                    <div class="summary-item"><span class="summary-label">사용 지역</span><span class="summary-value">${locationNames[formData.location] || '-'}</span></div>
+                    <div class="summary-item"><span class="summary-label">사용 기간</span><span class="summary-value">${formData.startDate && formData.endDate ? `${formData.startDate} ~ ${formData.endDate}` : '-'}</span></div>
+                    <div class="summary-item"><span class="summary-label">상세 주소</span><span class="summary-value">${formData.address || '-'}</span></div>
+                    <div class="summary-item"><span class="summary-label">연락처</span><span class="summary-value">${formData.phone || '-'}</span></div>
+                </div>
+
+                <div class="checkbox-group">
+                    <div class="input-label">추가 서비스 (선택사항)</div>
+                    <div class="checkbox-item ${formData.services.includes('driver') ? 'selected' : ''}" onclick="toggleService(this, 'driver')">
+                        <div class="checkbox">✓</div><div class="option-text"><div class="option-title">숙련 기사 포함</div><div class="option-desc">+₩50,000/일</div></div>
+                    </div>
+                    <div class="checkbox-item ${formData.services.includes('delivery') ? 'selected' : ''}" onclick="toggleService(this, 'delivery')">
+                        <div class="checkbox">✓</div><div class="option-text"><div class="option-title">현장 배송/픽업</div><div class="option-desc">+₩30,000</div></div>
+                    </div>
+                    <div class="checkbox-item ${formData.services.includes('insurance') ? 'selected' : ''}" onclick="toggleService(this, 'insurance')">
+                        <div class="checkbox">✓</div><div class="option-text"><div class="option-title">보험 패키지</div><div class="option-desc">+₩20,000/일</div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Handle option selection
+        function selectOption(element, field, value) {
+            element.parentNode.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            formData[field] = value;
+            updateContinueButton();
+            if (navigator.vibrate) navigator.vibrate(50);
+            setTimeout(nextStep, 200); // 자동 다음 단계로 이동
+        }
+
+        // Handle date change
+        function handleDateChange(field, value) {
+            formData[field] = value;
+            if (field === 'startDate') {
+                const endDateInput = document.getElementById('endDate');
+                endDateInput.disabled = false;
+                endDateInput.min = value;
+                if (formData.endDate && formData.endDate < value) {
+                    formData.endDate = null;
+                    endDateInput.value = '';
+                }
+            }
+            updateContinueButton();
+        }
+        
+        // Update form data for text inputs
+        function updateFormData(field, value) {
+            formData[field] = value;
+            updateContinueButton();
+        }
+
+        // Toggle service selection
+        function toggleService(element, service) {
+            element.classList.toggle('selected');
+            const index = formData.services.indexOf(service);
+            if (index > -1) formData.services.splice(index, 1);
+            else formData.services.push(service);
+        }
+
+        // Update continue button state
+        function updateContinueButton() {
+            const continueBtn = document.getElementById('continueBtn');
+            let isValid = false;
+            switch(currentStep) {
+                case 1: isValid = !!formData.equipment; break;
+                case 2: isValid = !!formData.size; break;
+                case 3: isValid = !!formData.location; break;
+                case 4: isValid = !!(formData.startDate && formData.endDate && formData.address && formData.phone); break;
+                case 5: isValid = true; break;
+            }
+            continueBtn.textContent = (currentStep === 5) ? '견적 요청하기' : '다음 단계';
+            if (isValid) continueBtn.classList.add('active');
+            else continueBtn.classList.remove('active');
+        }
+
+        // Go to next step
+        function nextStep() {
+            const continueBtn = document.getElementById('continueBtn');
+            if (!continueBtn.classList.contains('active')) return;
+
+            if (currentStep < 5) {
+                performNextTransition();
+            } else {
+                completeProcess();
+            }
+        }
+
+        // Go back to previous step
+        function goBack() {
+            if (currentStep > 1) {
+                performBackTransition();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        function performTransition(direction) {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.classList.add('content-fade-out');
+            
+            setTimeout(() => {
+                currentStep += direction;
+                updateProgress();
+                updateHeader(currentStep);
+                
+                mainContent.classList.remove('content-fade-out');
+                mainContent.style.opacity = '0';
+                loadStep(currentStep);
+                
+                setTimeout(() => {
+                    mainContent.style.opacity = '1';
+                    mainContent.classList.add('content-fade-in');
+                    setTimeout(() => mainContent.classList.remove('content-fade-in'), 500);
+                }, 50);
+            }, 300);
+        }
+
+        function performNextTransition() { performTransition(1); }
+        function performBackTransition() { performTransition(-1); }
+
+        // Complete process
+        function completeProcess() {
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.innerHTML = '처리중...';
+            continueBtn.classList.remove('active');
+
+            setTimeout(() => {
+                alert('견적 요청이 완료되었습니다!\n담당자가 곧 연락드릴 예정입니다.');
+                console.log('Final form data:', formData);
+                window.location.href = 'index.html';
+            }, 1500);
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>

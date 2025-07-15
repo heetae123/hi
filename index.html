@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중기모여 - 중장비 렌탈 플랫폼</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/icon-192.png">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Google Fonts - Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: white;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+
+        .mobile-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .location-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #212529;
+            cursor: pointer;
+        }
+
+        .greeting {
+            font-size: 16px;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        /* Main CTA */
+        .main-cta {
+            margin: 24px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .main-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 123, 255, 0.3);
+        }
+
+        .cta-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .cta-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        .cta-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .cta-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Categories */
+        .categories-section {
+            padding: 0 24px 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .view-all {
+            font-size: 14px;
+            color: #007bff;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .view-all:hover {
+            color: #0056b3;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .category-item {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .category-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .category-icon {
+            width: 56px;
+            height: 56px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+
+        .category-item:hover .category-icon {
+            border-color: #007bff;
+            background: #f8fafe;
+        }
+
+        .category-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #212529;
+        }
+
+        /* Popular Companies */
+        .popular-section {
+            padding: 24px;
+            background: #f8f9fa;
+        }
+
+        .popular-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 16px;
+        }
+
+        .popular-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .company-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .company-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 123, 255, 0.1);
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 4px;
+        }
+
+        .company-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ffa726;
+            font-weight: 500;
+        }
+
+        /* Quick Menu */
+        .quick-menu {
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .quick-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quick-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-item:hover {
+            border-color: #007bff;
+            background: #f8fafe;
+        }
+
+        .quick-icon {
+            width: 40px;
+            height: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 12px;
+        }
+
+        .quick-text {
+            flex: 1;
+        }
+
+        .quick-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 2px;
+        }
+
+        .quick-desc {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .quick-arrow {
+            color: #c1c7cd;
+            font-size: 16px;
+        }
+
+        /* Bottom Navigation - 5 tabs */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 375px;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #f1f3f4;
+            padding: 8px 0 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            text-decoration: none;
+            color: #a0a9b8;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .nav-item.active {
+            color: #007bff;
+        }
+
+        .nav-item:hover {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 9px;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Content Bottom Padding */
+        .content-wrapper {
+            padding-bottom: 80px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-cta {
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .categories-section {
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+
+        .popular-section {
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+
+        .quick-menu {
+            animation: fadeInUp 0.6s ease 0.4s both;
+        }
+
+        /* Responsive */
+        @media (max-width: 375px) {
+            .mobile-container {
+                max-width: 100%;
+            }
+
+            .bottom-nav {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="content-wrapper">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-top">
+                    <div class="logo">중기모여</div>
+                    <button class="location-btn" onclick="changeLocation()">
+                        📍 청주시 ▼
+                    </button>
+                </div>
+                <div class="greeting">오늘도 안전한 작업되세요!</div>
+            </div>
+
+            <!-- Main CTA -->
+            <div class="main-cta" onclick="goToSearch()">
+                <div class="cta-title">💫 견적 받기</div>
+                <div class="cta-subtitle">2분만에 무료 견적 완료</div>
+                <button class="cta-button">2분만에 견적받기 →</button>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 8px;">
+                    전화번호만 입력하면 완료 • 부담없이 확인
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="categories-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div class="section-title">장비 카테고리</div>
+                    <a href="s.html" class="view-all">더보기 ›</a>
+                </div>
+                <div class="categories-grid">
+                    <div class="category-item" onclick="goToSearchWithCategory('excavator')">
+                        <div class="category-icon">🚜</div>
+                        <div class="category-name">굴삭기</div>
+                    </div>
+                    <div class="category-item" onclick="goToSearchWithCategory('crane')">
+                        <div class="category-icon">🏗️</div>
+                        <div class="category-name">크레인</div>
+                    </div>
+                    <div class="category-item" onclick="goToSearchWithCategory('bulldozer')">
+                        <div class="category-icon">🚧</div>
+                        <div class="category-name">불도저</div>
+                    </div>
+                    <div class="category-item" onclick="goToSearchWithCategory('forklift')">
+                        <div class="category-icon">🚛</div>
+                        <div class="category-name">지게차</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Companies -->
+            <div class="popular-section">
+                <div class="popular-title" style="color: #dc3545;">
+                    🔥 실시간 인기 업체
+                    <span style="font-size: 12px; color: #6c757d; font-weight: 400; margin-left: 8px;">
+                        현재 12명이 견적 진행중
+                    </span>
+                </div>
+                <div class="popular-list">
+                    <div class="company-card" onclick="showComingSoon()">
+                        <div class="company-info">
+                            <div class="company-name">강남건설장비</div>
+                            <div class="company-meta">
+                                <div class="rating">⭐ 4.9</div>
+                                <div>굴삭기 전문</div>
+                            </div>
+                            <div style="font-size: 12px; color: #28a745; margin-top: 4px;">
+                                💚 현재 3대 예약 가능 • 이번 달 47명 이용
+                            </div>
+                        </div>
+                    </div>
+                    <div class="company-card" onclick="showComingSoon()">
+                        <div class="company-info">
+                            <div class="company-name">대전중장비렌탈</div>
+                            <div class="company-meta">
+                                <div class="rating">⭐ 4.8</div>
+                                <div>크레인 전문</div>
+                            </div>
+                            <div style="font-size: 12px; color: #28a745; margin-top: 4px;">
+                                💚 현재 2대 예약 가능 • 25분 전 견적 완료
+                            </div>
+                        </div>
+                    </div>
+                    <div class="company-card" onclick="showComingSoon()">
+                        <div class="company-info">
+                            <div class="company-name">청주기계렌탈</div>
+                            <div class="company-meta">
+                                <div class="rating">⭐ 4.7</div>
+                                <div>종합 렌탈</div>
+                            </div>
+                            <div style="font-size: 12px; color: #ffa726; margin-top: 4px;">
+                                ⚡ 평균 응답시간 15분 • 이번 달 31명 이용
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Menu -->
+            <div class="quick-menu">
+                <div class="section-title">바로가기</div>
+                <div class="quick-grid">
+                    <div class="quick-item" onclick="showComingSoon()">
+                        <div class="quick-icon">📍</div>
+                        <div class="quick-text">
+                            <div class="quick-title">지역 인기 업체</div>
+                            <div class="quick-desc">청주시 주변 평점 높은 업체</div>
+                        </div>
+                        <div class="quick-arrow">›</div>
+                    </div>
+                    <div class="quick-item" onclick="showComingSoon()">
+                        <div class="quick-icon">🕐</div>
+                        <div class="quick-text">
+                            <div class="quick-title">최근 이용 업체</div>
+                            <div class="quick-desc">이전에 이용했던 업체 다시 찾기</div>
+                        </div>
+                        <div class="quick-arrow">›</div>
+                    </div>
+                    <div class="quick-item" onclick="showComingSoon()">
+                        <div class="quick-icon">🚨</div>
+                        <div class="quick-text">
+                            <div class="quick-title">당일 긴급 요청</div>
+                            <div class="quick-desc">오늘 당장 사용 가능한 장비</div>
+                        </div>
+                        <div class="quick-arrow">›</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <a href="index.html" class="nav-item active">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </a>
+            <a href="s.html" class="nav-item">
+                <div class="nav-icon">🔍</div>
+                <div class="nav-label">장비찾기</div>
+            </a>
+            <a href="search.html" class="nav-item">
+                <div class="nav-icon">📝</div>
+                <div class="nav-label">견적받기</div>
+            </a>
+            <div class="nav-item" onclick="showComingSoon()">
+                <div class="nav-icon">📋</div>
+                <div class="nav-label">거래내역</div>
+            </div>
+            <div class="nav-item" onclick="showComingSoon()">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">내정보</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                .register("/service-worker.js")
+                .then((reg) => console.log("✅ Service Worker registered:", reg.scope))
+                .catch((err) => console.error("❌ Service Worker registration failed:", err));
+            });
+        }
+
+        function goToSearch() {
+            const ctaButton = document.querySelector('.cta-button');
+            ctaButton.textContent = '로딩중...';
+            ctaButton.style.opacity = '0.7';
+            setTimeout(() => {
+                window.location.href = 'search.html';
+            }, 500);
+        }
+
+        function goToSearchWithCategory(category) {
+            event.target.closest('.category-item').style.background = '#f8fafe';
+            setTimeout(() => {
+                window.location.href = 'search.html';
+            }, 200);
+        }
+
+        function changeLocation() {
+            const locationBtn = document.querySelector('.location-btn');
+            locationBtn.style.background = '#e3f2fd';
+            setTimeout(() => {
+                alert('지역 변경 기능은 준비 중입니다.');
+                locationBtn.style.background = '#f8f9fa';
+            }, 100);
+        }
+
+        function showComingSoon() {
+            alert('준비 중인 기능입니다.\n곧 만나보실 수 있어요! 🚀');
+        }
+
+        // 터치 피드백
+        document.querySelectorAll('.main-cta, .category-item, .company-card, .quick-item').forEach(element => {
+            element.addEventListener('touchstart', function(e) {
+                this.style.transform = 'scale(0.98)';
+                this.style.transition = 'transform 0.1s ease';
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            });
+            element.addEventListener('touchend', function(e) {
+                setTimeout(() => {
+                    this.style.transform = '';
+                    this.style.transition = 'transform 0.2s ease';
+                }, 100);
+            });
+            element.addEventListener('touchcancel', function(e) {
+                this.style.transform = '';
+                this.style.transition = 'transform 0.2s ease';
+            });
+        });
+
+        // 실시간 정보 업데이트 시뮬레이션
+        function updateRealTimeInfo() {
+            const currentUsers = Math.floor(Math.random() * 10) + 8;
+            const headerSubtext = document.querySelector('.popular-title span');
+            if (headerSubtext) {
+                headerSubtext.textContent = `현재 ${currentUsers}명이 견적 진행중`;
+            }
+        }
+        setTimeout(updateRealTimeInfo, 1000);
+        setInterval(updateRealTimeInfo, 300000);
+
+        // 더블 탭 확대 방지
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>

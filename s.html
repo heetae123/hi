@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중기모여 - 중장비 렌탈 검색</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/icon-192.png">
+    <meta name="theme-color" content="#007bff">
+    
+    <!-- Google Fonts - Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            color: #212529;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+        
+        .mobile-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Header */
+        .header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f3f4;
+            background: white;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .location-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #212529;
+            cursor: pointer;
+        }
+
+        .greeting {
+            font-size: 16px;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        /* Content Wrapper */
+        .content-wrapper {
+            padding-bottom: 80px;
+        }
+        
+        .location-bar {
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .date-btn {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        
+        .date-btn:hover {
+            background: #f1f3f5;
+        }
+        
+        .date-btn::after {
+            content: ' ▼';
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 350px;
+            max-height: 80vh;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        /* 지역 선택 모달 */
+        .region-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .region-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .region-item:hover {
+            background: #f8f9fa;
+        }
+        .region-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .region-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .back-btn {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 12px;
+        }
+        .back-btn:hover {
+            background: #f8f9fa;
+        }
+        .back-btn .region-name {
+            color: #007bff;
+            font-weight: 500;
+        }
+        
+        /* 날짜 선택 모달 */
+        .date-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .date-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .date-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .date-input {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        .date-confirm {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .filter-btn {
+            padding: 8px 12px;
+            font-size: 13px;
+            background: #f1f3f5;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .filter-btn:hover {
+            background: #e9ecef;
+        }
+        .filter-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .filter-btn.active::after {
+            content: '✓';
+            margin-left: 4px;
+        }
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .filter-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .clear-filters {
+            background: none;
+            border: none;
+            color: #007bff;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .results-count {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            font-size: 12px;
+            color: #6c757d;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .ad-banner {
+            margin: 12px 16px;
+            background: #e9f4ff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #007bff;
+        }
+        .equipment-item {
+            background: white;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 12px;
+        }
+        .equipment-image {
+            flex-shrink: 0;
+            width: 100px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .equipment-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .equipment-info {
+            flex: 1;
+        }
+        .equipment-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .price {
+            font-weight: 500;
+            color: #dc3545;
+            margin-bottom: 8px;
+        }
+        .meta {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        .company {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #495057;
+        }
+        .highlight {
+            color: #28a745;
+            font-weight: 500;
+        }
+        .tag {
+            font-size: 12px;
+            background: #e3f2fd;
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 4px;
+            color: #007bff;
+        }
+
+        /* Bottom Navigation - 5 tabs */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 375px;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #f1f3f4;
+            padding: 8px 0 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            text-decoration: none;
+            color: #a0a9b8;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .nav-item.active {
+            color: #007bff;
+        }
+
+        .nav-item:hover {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 9px;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* Responsive */
+        @media (max-width: 375px) {
+            .mobile-container {
+                max-width: 100%;
+            }
+
+            .bottom-nav {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <div class="logo">중기모여</div>
+                <button class="location-btn" onclick="changeLocation()">
+                    📍 청주시 ▼
+                </button>
+            </div>
+            <div class="greeting">원하는 중장비를 찾아보세요!</div>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="location-bar">
+                <button class="location-btn" id="locationBtn">서울 / 강남구</button>
+                <button class="date-btn" id="dateBtn">07.16 (수) ~ 07.17 (목)</button>
+            </div>
+
+            <div class="filter-header">
+                <div class="filter-title">장비 필터</div>
+                <button class="clear-filters" onclick="clearAllFilters()">전체 해제</button>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all" onclick="toggleFilter(this, 'all')">전체</button>
+                <button class="filter-btn" data-filter="굴삭기" onclick="toggleFilter(this, '굴삭기')">굴삭기</button>
+                <button class="filter-btn" data-filter="로더" onclick="toggleFilter(this, '로더')">로더</button>
+                <button class="filter-btn" data-filter="덤프트럭" onclick="toggleFilter(this, '덤프트럭')">덤프트럭</button>
+                <button class="filter-btn" data-filter="크레인" onclick="toggleFilter(this, '크레인')">크레인</button>
+                <button class="filter-btn" data-filter="지게차" onclick="toggleFilter(this, '지게차')">지게차</button>
+                <button class="filter-btn" data-filter="롤러" onclick="toggleFilter(this, '롤러')">롤러</button>
+                <button class="filter-btn" data-filter="20톤급" onclick="toggleFilter(this, '20톤급')">20톤급</button>
+                <button class="filter-btn" data-filter="5톤급" onclick="toggleFilter(this, '5톤급')">5톤급</button>
+                <button class="filter-btn" data-filter="25톤급" onclick="toggleFilter(this, '25톤급')">25톤급</button>
+                <button class="filter-btn" data-filter="55톤급" onclick="toggleFilter(this, '55톤급')">55톤급</button>
+                <button class="filter-btn" data-filter="운전자포함" onclick="toggleFilter(this, '운전자포함')">운전자 포함</button>
+                <button class="filter-btn" data-filter="현재가능" onclick="toggleFilter(this, '현재가능')">현재 대여 가능</button>
+            </div>
+
+            <div class="results-count" id="resultsCount">총 6개 장비</div>
+
+            <div class="ad-banner">중장비 렌탈과 운송을 한번에, 중기모여에서!</div>
+
+            <div class="equipment-item" data-tags="굴삭기,20톤급,운전자포함,현재가능">
+                <div class="equipment-image">
+                    <img src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=300&h=200&fit=crop" alt="굴삭기" />
+                </div>
+                <div class="equipment-info">
+                    <div class="equipment-title">현대 굴삭기 R220LC-9S<span class="tag">20톤급</span></div>
+                    <div class="price">180,000 ~ 220,000원/일</div>
+                    <div class="meta">🏗️ 운전자 포함 · 유류비 별도 · 8시간 기준</div>
+                    <div class="company">
+                        대한중장비 강남점<br>
+                        평점 4.8 / 대여건수 150+<br>
+                        <span class="highlight">💚 현재 3대 대여 가능</span><br>
+                        운전자 포함 가격: <strong>220,000원</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equipment-item" data-tags="로더,5톤급,운전자포함,현재가능">
+                <div class="equipment-image">
+                    <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=300&h=200&fit=crop" alt="로더" />
+                </div>
+                <div class="equipment-info">
+                    <div class="equipment-title">볼보 휠로더 L120H<span class="tag">5톤급</span></div>
+                    <div class="price">150,000 ~ 180,000원/일</div>
+                    <div class="meta">🚜 운전자 포함 · 유류비 별도 · 8시간 기준</div>
+                    <div class="company">
+                        서울중기렌탈 마포점<br>
+                        평점 4.9 / 대여건수 200+<br>
+                        <span class="highlight">💚 현재 2대 대여 가능</span><br>
+                        운전자 포함 가격: <strong>180,000원</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equipment-item" data-tags="덤프트럭,25톤급,운전자포함,현재가능">
+                <div class="equipment-image">
+                    <img src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop" alt="덤프트럭" />
+                </div>
+                <div class="equipment-info">
+                    <div class="equipment-title">현대 덤프트럭 HD270<span class="tag">25톤급</span></div>
+                    <div class="price">200,000 ~ 250,000원/일</div>
+                    <div class="meta">🚛 운전자 포함 · 유류비 별도 · 8시간 기준</div>
+                    <div class="company">
+                        중기플러스 용산점<br>
+                        평점 4.7 / 대여건수 100+<br>
+                        <span class="highlight">💚 현재 1대 대여 가능</span><br>
+                        운전자 포함 가격: <strong>250,000원</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equipment-item" data-tags="크레인,55톤급,운전자포함,현재가능">
+                <div class="equipment-image">
+                    <img src="https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=300&h=200&fit=crop" alt="크레인" />
+                </div>
+                <div class="equipment-info">
+                    <div class="equipment-title">타다노 크레인 GR-550XL<span class="tag">55톤급</span></div>
+                    <div class="price">400,000 ~ 500,000원/일</div>
+                    <div class="meta">🏗️ 운전자 포함 · 유류비 별도 · 8시간 기준</div>
+                    <div class="company">
+                        한국크레인 강남점<br>
+                        평점 5.0 / 대여건수 80+<br>
+                        <span class="highlight">💚 현재 1대 대여 가능</span><br>
+                        운전자 포함 가격: <strong>500,000원</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equipment-item" data-tags="지게차,3톤급,운전자포함,현재가능">
+                <div class="equipment-image">
+                    <img src="https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=300&h=200&fit=crop" alt="지게차" />
+                </div>
+                <div class="equipment-info">
+                    <div class="equipment-title">도요타 지게차 8FBE30<span class="tag">3톤급</span></div>
+                    <div class="price">80,000 ~ 100,000원/일</div>
+                    <div class="meta">🚛 운전자 포함 · 유류비 별도 · 8시간 기준</div>
+                    <div class="company">
+                        서울지게차 강남점<br>
+                        평점 4.6 / 대여건수 300+<br>
+                        <span class="highlight">💚 현재 5대 대여 가능</span><br>
+                        운전자 포함 가격: <strong>100,000원</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equipment-item" data-tags="롤러,12톤급,운전자포함,현재가능">
+                <div class="equipment-image">
+                    <img src="https://images.unsplash.com/photo-1597149727816-8e4b8c7a5e9b?w=300&h=200&fit=crop" alt="롤러" />
+                </div>
+                <div class="equipment-info">
+                    <div class="equipment-title">볼보 롤러 SD115<span class="tag">12톤급</span></div>
+                    <div class="price">160,000 ~ 200,000원/일</div>
+                    <div class="meta">🛣️ 운전자 포함 · 유류비 별도 · 8시간 기준</div>
+                    <div class="company">
+                        도로건설기계 마포점<br>
+                        평점 4.5 / 대여건수 120+<br>
+                        <span class="highlight">💚 현재 1대 대여 가능</span><br>
+                        운전자 포함 가격: <strong>200,000원</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </a>
+            <a href="s.html" class="nav-item active">
+                <div class="nav-icon">🔍</div>
+                <div class="nav-label">장비찾기</div>
+            </a>
+            <a href="search.html" class="nav-item">
+                <div class="nav-icon">📝</div>
+                <div class="nav-label">견적받기</div>
+            </a>
+            <div class="nav-item" onclick="showComingSoon()">
+                <div class="nav-icon">📋</div>
+                <div class="nav-label">거래내역</div>
+            </div>
+            <div class="nav-item" onclick="showComingSoon()">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">내정보</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 지역 선택 모달 -->
+    <div class="modal" id="locationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">지역 선택</div>
+                <button class="close-btn" onclick="closeModal('locationModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 광역시/도 목록 -->
+                <div class="region-list" id="cityList">
+                    <div class="region-item" onclick="showDistricts('서울')">
+                        <div class="region-name">
+                            <div class="region-icon">🏢</div>
+                            <div>서울</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('부산')">
+                        <div class="region-name">
+                            <div class="region-icon">🏖️</div>
+                            <div>부산</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('대구')">
+                        <div class="region-name">
+                            <div class="region-icon">🏗️</div>
+                            <div>대구</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('인천')">
+                        <div class="region-name">
+                            <div class="region-icon">✈️</div>
+                            <div>인천</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('경기')">
+                        <div class="region-name">
+                            <div class="region-icon">🏛️</div>
+                            <div>경기</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('강원')">
+                        <div class="region-name">
+                            <div class="region-icon">🏔️</div>
+                            <div>강원</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('충북')">
+                        <div class="region-name">
+                            <div class="region-icon">🏞️</div>
+                            <div>충북</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('충남')">
+                        <div class="region-name">
+                            <div class="region-icon">🏞️</div>
+                            <div>충남</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('전북')">
+                        <div class="region-name">
+                            <div class="region-icon">🌾</div>
+                            <div>전북</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('전남')">
+                        <div class="region-name">
+                            <div class="region-icon">🌾</div>
+                            <div>전남</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('경북')">
+                        <div class="region-name">
+                            <div class="region-icon">🏔️</div>
+                            <div>경북</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('경남')">
+                        <div class="region-name">
+                            <div class="region-icon">🏔️</div>
+                            <div>경남</div>
+                        </div>
+                    </div>
+                    <div class="region-item" onclick="showDistricts('제주')">
+                        <div class="region-name">
+                            <div class="region-icon">🏝️</div>
+                            <div>제주</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 구/시 목록 -->
+                <div class="region-list" id="districtList" style="display: none;">
+                    <div class="back-btn" onclick="showCityList()">
+                        <div class="region-name">
+                            <div class="region-icon">←</div>
+                            <div>뒤로 가기</div>
+                        </div>
+                    </div>
+                    <div id="districtItems"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 날짜 선택 모달 -->
+    <div class="modal" id="dateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">날짜 선택</div>
+                <button class="close-btn" onclick="closeModal('dateModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="date-selector">
+                    <div class="date-group">
+                        <div class="date-label">대여 시작일</div>
+                        <input type="date" class="date-input" id="startDate" value="2024-07-16">
+                    </div>
+                    <div class="date-group">
+                        <div class="date-label">대여 종료일</div>
+                        <input type="date" class="date-input" id="endDate" value="2024-07-17">
+                    </div>
+                    <button class="date-confirm" onclick="confirmDateSelection()">날짜 확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                .register("/service-worker.js")
+                .then((reg) => console.log("✅ Service Worker registered:", reg.scope))
+                .catch((err) => console.error("❌ Service Worker registration failed:", err));
+            });
+        }
+
+        // 지역 데이터
+        const regionData = {
+            '서울': ['강남구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구', '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구', '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구', '광진구'],
+            '부산': ['강서구', '금정구', '남구', '동구', '동래구', '부산진구', '북구', '사상구', '사하구', '서구', '수영구', '연제구', '영도구', '중구', '해운대구', '기장군'],
+            '대구': ['남구', '달서구', '달성군', '동구', '북구', '서구', '수성구', '중구'],
+            '인천': ['강화군', '계양구', '남동구', '동구', '미추홀구', '부평구', '서구', '연수구', '옹진군', '중구'],
+            '경기': ['고양시', '과천시', '광명시', '광주시', '구리시', '군포시', '김포시', '남양주시', '동두천시', '부천시', '성남시', '수원시', '시흥시', '안산시', '안성시', '안양시', '양주시', '여주시', '오산시', '용인시', '의왕시', '의정부시', '이천시', '파주시', '평택시', '포천시', '하남시', '화성시'],
+            '강원': ['강릉시', '고성군', '동해시', '삼척시', '속초시', '양구군', '양양군', '영월군', '원주시', '인제군', '정선군', '철원군', '춘천시', '태백시', '평창군', '홍천군', '화천군', '횡성군'],
+            '충북': ['괴산군', '단양군', '보은군', '영동군', '옥천군', '음성군', '제천시', '진천군', '청주시', '충주시', '증평군'],
+            '충남': ['계룡시', '공주시', '금산군', '논산시', '당진시', '보령시', '부여군', '서산시', '서천군', '아산시', '연기군', '예산군', '천안시', '청양군', '태안군', '홍성군'],
+            '전북': ['고창군', '군산시', '김제시', '남원시', '무주군', '부안군', '순창군', '완주군', '익산시', '임실군', '장수군', '전주시', '정읍시', '진안군'],
+            '전남': ['강진군', '고흥군', '곡성군', '광양시', '구례군', '나주시', '담양군', '목포시', '무안군', '보성군', '순천시', '신안군', '여수시', '영광군', '영암군', '완도군', '장성군', '장흥군', '진도군', '함평군', '해남군', '화순군'],
+            '경북': ['경산시', '경주시', '고령군', '구미시', '군위군', '김천시', '문경시', '봉화군', '상주시', '성주군', '안동시', '영덕군', '영양군', '영주시', '영천시', '예천군', '울릉군', '울진군', '의성군', '청도군', '청송군', '칠곡군', '포항시'],
+            '경남': ['거제시', '거창군', '고성군', '김해시', '남해군', '밀양시', '사천시', '산청군', '양산시', '의령군', '진주시', '창녕군', '창원시', '통영시', '하동군', '함안군', '함양군', '합천군'],
+            '제주': ['서귀포시', '제주시']
+        };
+
+        // 지역 선택 버튼 클릭
+        document.getElementById('locationBtn').addEventListener('click', function() {
+            showCityList();
+            document.getElementById('locationModal').classList.add('active');
+        });
+
+        // 날짜 선택 버튼 클릭
+        document.getElementById('dateBtn').addEventListener('click', function() {
+            document.getElementById('dateModal').classList.add('active');
+        });
+
+        // 모달 닫기
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // 모달 배경 클릭 시 닫기
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // 광역시/도 목록 표시
+        function showCityList() {
+            document.getElementById('cityList').style.display = 'block';
+            document.getElementById('districtList').style.display = 'none';
+            document.getElementById('modalTitle').textContent = '지역 선택';
+        }
+
+        // 구/시 목록 표시
+        function showDistricts(city) {
+            document.getElementById('cityList').style.display = 'none';
+            document.getElementById('districtList').style.display = 'block';
+            document.getElementById('modalTitle').textContent = city + ' 지역 선택';
+            
+            const districts = regionData[city];
+            const districtItems = document.getElementById('districtItems');
+            districtItems.innerHTML = '';
+            
+            districts.forEach(district => {
+                const districtItem = document.createElement('div');
+                districtItem.className = 'region-item';
+                districtItem.onclick = () => selectRegion(city, district);
+                districtItem.innerHTML = `
+                    <div class="region-name">
+                        <div class="region-icon">📍</div>
+                        <div>${district}</div>
+                    </div>
+                `;
+                districtItems.appendChild(districtItem);
+            });
+        }
+
+        // 지역 선택
+        function selectRegion(city, district) {
+            const locationBtn = document.getElementById('locationBtn');
+            locationBtn.textContent = city + ' / ' + district;
+            closeModal('locationModal');
+        }
+
+        // 활성 필터 목록
+        let activeFilters = ['all'];
+
+        // 필터 토글 함수
+        function toggleFilter(button, filterType) {
+            // 전체 필터 클릭 시
+            if (filterType === 'all') {
+                activeFilters = ['all'];
+                updateFilterButtons();
+                filterEquipment();
+                return;
+            }
+
+            // 전체가 활성화된 상태에서 다른 필터 선택 시
+            if (activeFilters.includes('all')) {
+                activeFilters = [filterType];
+            } else {
+                // 이미 선택된 필터 클릭 시 제거
+                const index = activeFilters.indexOf(filterType);
+                if (index > -1) {
+                    activeFilters.splice(index, 1);
+                } else {
+                    activeFilters.push(filterType);
+                }
+            }
+
+            // 필터가 비어있으면 전체 선택
+            if (activeFilters.length === 0) {
+                activeFilters = ['all'];
+            }
+
+            updateFilterButtons();
+            filterEquipment();
+        }
+
+        // 필터 버튼 상태 업데이트
+        function updateFilterButtons() {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(button => {
+                const filterType = button.dataset.filter;
+                if (activeFilters.includes(filterType)) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        // 장비 필터링
+        function filterEquipment() {
+            const equipmentItems = document.querySelectorAll('.equipment-item');
+            let visibleCount = 0;
+
+            equipmentItems.forEach(item => {
+                if (activeFilters.includes('all')) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    const tags = item.dataset.tags.split(',');
+                    const hasMatchingTag = activeFilters.some(filter => tags.includes(filter));
+                    
+                    if (hasMatchingTag) {
+                        item.style.display = 'flex';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+
+            // 결과 개수 업데이트
+            document.getElementById('resultsCount').textContent = `총 ${visibleCount}개 장비`;
+        }
+
+        // 모든 필터 해제
+        function clearAllFilters() {
+            activeFilters = ['all'];
+            updateFilterButtons();
+            filterEquipment();
+        }
+
+        // 날짜 선택 확인
+        function confirmDateSelection() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                
+                const startFormatted = formatDate(start);
+                const endFormatted = formatDate(end);
+                
+                const dateBtn = document.getElementById('dateBtn');
+                dateBtn.textContent = startFormatted + ' ~ ' + endFormatted;
+                
+                closeModal('dateModal');
+            } else {
+                alert('날짜를 모두 선택해주세요.');
+            }
+        }
+
+        // 날짜 포맷팅 함수
+        function formatDate(date) {
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+            const weekday = weekdays[date.getDay()];
+            
+            return `${month}.${day} (${weekday})`;
+        }
+
+        // 지역 변경 함수
+        function changeLocation() {
+            const locationBtn = document.querySelector('.location-btn');
+            locationBtn.style.background = '#e3f2fd';
+            setTimeout(() => {
+                alert('지역 변경 기능은 준비 중입니다.');
+                locationBtn.style.background = '#f8f9fa';
+            }, 100);
+        }
+
+        // 준비 중 알림
+        function showComingSoon() {
+            alert('준비 중인 기능입니다.\n곧 만나보실 수 있어요! 🚀');
+        }
+
+        // 초기 날짜 설정
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        
+        document.getElementById('startDate').value = today.toISOString().split('T')[0];
+        document.getElementById('endDate').value = tomorrow.toISOString().split('T')[0];
+    </script>
+</body>
+</html>
