@@ -11,11 +11,6 @@
   "description": "중장비 렌탈의 새로운 기준, 카키스케치",
   "icons": [
     {
-      "src": "/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
