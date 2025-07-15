@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원정보 - 중기모여</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans KR', Arial, sans-serif;
+      background-color: #fff;
+      color: #333;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .header-icon {
+      font-size: 20px;
+      color: #666;
+      cursor: pointer;
+    }
+    .profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0;
+    }
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #e8f0fe, #1a73e8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: white;
+      margin-bottom: 16px;
+    }
+    .profile-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .profile-subtitle {
+      font-size: 14px;
+      color: #666;
+    }
+    .status {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      padding: 24px 0;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 16px;
+    }
+    .status-item {
+      text-align: center;
+    }
+    .status-item .label {
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .status-item .count {
+      color: #1a73e8;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .menu {
+      border-top: 1px solid #f0f0f0;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .menu-item:hover {
+      background-color: #f8f9fa;
+    }
+    .menu-item:last-child {
+      border-bottom: none;
+    }
+    .menu-item .icon {
+      font-size: 20px;
+      margin-right: 12px;
+      color: #666;
+    }
+    .menu-item .content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    .menu-item .arrow {
+      font-size: 16px;
+      color: #ccc;
+    }
+    .menu-item.logout {
+      color: #d32f2f;
+    }
+    .menu-item.logout .icon {
+      color: #d32f2f;
+    }
+    
+    /* 반응형 디자인 */
+    @media (max-width: 375px) {
+      .container {
+        padding: 12px;
+      }
+      .status {
+        gap: 24px;
+      }
+      .menu-item {
+        padding: 16px 0;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-icon" onclick="goBack()">☰</div>
+      <div>회원정보</div>
+      <div class="header-icon" onclick="showNotifications()">🔔</div>
+    </div>
+    
+    <div class="profile">
+      <div class="profile-avatar">👤</div>
+      <div class="profile-name">홍길동</div>
+      <div class="profile-subtitle">중기모여 회원</div>
+    </div>
+    
+    <div class="status">
+      <div class="status-item">
+        <div class="label">남긴 리뷰</div>
+        <div class="count">12</div>
+      </div>
+      <div class="status-item">
+        <div class="label">상담 내역</div>
+        <div class="count">10</div>
+      </div>
+    </div>
+    
+    <div class="menu">
+      <div class="menu-item" onclick="goToPage('profile')">
+        <div class="content">
+          <div class="icon">👤</div>
+          <div>내 정보 관리</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      
+      <div class="menu-item" onclick="goToPage('orders')">
+        <div class="content">
+          <div class="icon">📋</div>
+          <div>거래 내역</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      
+      <div class="menu-item" onclick="goToPage('quotes')">
+        <div class="content">
+          <div class="icon">💬</div>
+          <div>견적 문의 내역</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      
+      <div class="menu-item" onclick="goToPage('favorites')">
+        <div class="content">
+          <div class="icon">❤️</div>
+          <div>관심 장비/업체</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      
+      <div class="menu-item" onclick="goToPage('reviews')">
+        <div class="content">
+          <div class="icon">⭐</div>
+          <div>내 리뷰 관리</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      
+      <div class="menu-item" onclick="goToPage('support')">
+        <div class="content">
+          <div class="icon">🎧</div>
+          <div>고객 센터</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      
+      <div class="menu-item" onclick="goToPage('settings')">
+        <div class="content">
+          <div class="icon">⚙️</div>
+          <div>설정</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+      
+      <div class="menu-item logout" onclick="logout()">
+        <div class="content">
+          <div class="icon">🚪</div>
+          <div>로그아웃</div>
+        </div>
+        <div class="arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function goBack() {
+      // 뒤로가기 기능
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+
+    function showNotifications() {
+      alert('알림 기능은 준비 중입니다.');
+    }
+
+    function goToPage(page) {
+      // 각 페이지로 이동하는 기능
+      switch(page) {
+        case 'profile':
+          alert('내 정보 관리 페이지로 이동합니다.');
+          break;
+        case 'orders':
+          alert('거래 내역 페이지로 이동합니다.');
+          break;
+        case 'quotes':
+          alert('견적 문의 내역 페이지로 이동합니다.');
+          break;
+        case 'favorites':
+          alert('관심 장비/업체 페이지로 이동합니다.');
+          break;
+        case 'reviews':
+          alert('내 리뷰 관리 페이지로 이동합니다.');
+          break;
+        case 'support':
+          alert('고객 센터 페이지로 이동합니다.');
+          break;
+        case 'settings':
+          alert('설정 페이지로 이동합니다.');
+          break;
+        default:
+          alert('준비 중인 기능입니다.');
+      }
+    }
+
+    function logout() {
+      const confirmLogout = confirm('정말 로그아웃 하시겠습니까?');
+      if (confirmLogout) {
+        alert('로그아웃 되었습니다.');
+        // 실제로는 세션 정리 후 로그인 페이지로 리다이렉트
+        window.location.href = 'index.html';
+      }
+    }
+
+    // 터치 피드백 추가
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('touchstart', function() {
+        this.style.backgroundColor = '#f0f0f0';
+      });
+      
+      item.addEventListener('touchend', function() {
+        setTimeout(() => {
+          this.style.backgroundColor = '';
+        }, 200);
+      });
+    });
+  </script>
+</body>
+</html>
