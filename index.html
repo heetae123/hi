@@ -16,9 +16,9 @@
     
     <style>
         :root {
-            --primary-color: #1a73e8;
-            --primary-dark: #1557b0;
-            --primary-light: #e8f0fe;
+            --primary-color: #fbbc04;
+            --primary-dark: #e0a800;
+            --primary-light: #fff8e1;
             --secondary-color: #34a853;
             --accent-color: #fbbc04;
             --error-color: #ea4335;
@@ -166,7 +166,7 @@
         /* Main CTA */
         .main-cta {
             margin: 20px;
-            background: linear-gradient(135deg, #1a73e8 0%, #1557b0 50%, #0d47a1 100%);
+            background: linear-gradient(135deg, #fbbc04 0%, #e0a800 50%, #cc9900 100%);
             border-radius: var(--border-radius-large);
             padding: 36px 28px;
             text-align: center;
@@ -174,7 +174,7 @@
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(26, 115, 232, 0.3);
+            box-shadow: 0 8px 32px rgba(251, 188, 4, 0.3);
         }
 
         .main-cta::before {
@@ -299,42 +299,45 @@
         }
 
         .view-all:hover {
-            background: rgba(26, 115, 232, 0.1);
+            background: rgba(251, 188, 4, 0.1);
         }
 
+        /* 카테고리 그리드 개선 */
         .categories-grid {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 8px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 0 4px;
         }
 
         .category-item {
-            flex: 1;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: var(--transition);
-            padding: 12px 8px;
+            padding: 16px 8px;
             border-radius: var(--border-radius);
-            max-width: 80px;
-            margin: 0 auto;
+            text-align: center;
+            min-height: 100px;
         }
 
         .category-item:hover {
             transform: translateY(-2px);
-            background: rgba(26, 115, 232, 0.05);
+            background: rgba(251, 188, 4, 0.05);
         }
 
         .category-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #f8f9fa, #e8f0fe);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #f8f9fa, #fff8e1);
             border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            margin: 0 auto 8px;
+            font-size: 26px;
+            margin-bottom: 8px;
             border: 2px solid #e8eaed;
             transition: var(--transition);
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -349,13 +352,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255,193,7,0.1) 50%, transparent 70%);
+            background: linear-gradient(45deg, transparent 30%, rgba(251, 188, 4, 0.1) 50%, transparent 70%);
             z-index: -1;
         }
 
         .category-item:hover .category-icon {
             border-color: var(--primary-color);
-            background: linear-gradient(135deg, #e8f0fe, var(--primary-color));
+            background: linear-gradient(135deg, #fff8e1, var(--primary-color));
             transform: scale(1.05);
         }
 
@@ -365,6 +368,7 @@
             color: var(--text-primary);
             word-wrap: break-word;
             line-height: 1.2;
+            text-align: center;
         }
 
         /* Popular Companies */
@@ -565,6 +569,7 @@
             box-shadow: var(--shadow-light);
         }
 
+        /* 퀵 메뉴 아이콘 정렬 개선 */
         .quick-icon {
             width: 48px;
             height: 48px;
@@ -579,6 +584,7 @@
             box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .quick-icon::before {
@@ -594,6 +600,7 @@
 
         .quick-text {
             flex: 1;
+            min-width: 0;
         }
 
         .quick-title {
@@ -608,6 +615,7 @@
             font-size: 13px;
             color: var(--text-secondary);
             font-weight: 400;
+            line-height: 1.3;
         }
 
         .quick-arrow {
@@ -615,6 +623,8 @@
             font-size: 18px;
             font-weight: 600;
             transition: var(--transition);
+            margin-left: 8px;
+            flex-shrink: 0;
         }
 
         .quick-item:hover .quick-arrow {
@@ -622,7 +632,7 @@
             transform: translateX(4px);
         }
 
-        /* Bottom Navigation */
+        /* Bottom Navigation 개선 */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -658,6 +668,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 8px 12px;
             cursor: pointer;
             transition: var(--transition);
@@ -667,6 +678,7 @@
             min-width: 0;
             border-radius: 12px;
             position: relative;
+            text-align: center;
         }
 
         .nav-item.active {
@@ -687,13 +699,18 @@
 
         .nav-item:hover {
             color: var(--primary-color);
-            background: rgba(26, 115, 232, 0.05);
+            background: rgba(251, 188, 4, 0.05);
         }
 
         .nav-icon {
             font-size: 20px;
             margin-bottom: 4px;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
         }
 
         .nav-item:hover .nav-icon {
@@ -705,6 +722,7 @@
             font-weight: 500;
             text-align: center;
             line-height: 1.2;
+            white-space: nowrap;
         }
 
         /* Content Bottom Padding */
@@ -816,9 +834,18 @@
             .quick-menu {
                 padding: 20px 16px;
             }
+            
+            .categories-grid {
+                gap: 8px;
+                padding: 0 2px;
+            }
+            
+            .category-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 24px;
+            }
         }
-
-        /* Dark mode support - 제거 */
     </style>
 </head>
 <body>
@@ -962,11 +989,9 @@
                 <div class="nav-icon">📝</div>
                 <div class="nav-label">견적받기</div>
             </a>
-            <a href="mypage.html">
-            <div class="nav-item" onclick="showComingSoon()">
+            <a href="mypage.html" class="nav-item">
                 <div class="nav-icon">👤</div>
                 <div class="nav-label">마이페이지</div>
-            </div>
             </a>
         </div>
     </div>
@@ -1030,7 +1055,7 @@
                     updateLocationBasedData(newLocation);
                 }
                 
-                locationBtn.style.background = 'var(--background-color)';
+                locationBtn.style.background = '#f8f9fa';
                 locationBtn.style.color = 'var(--text-primary)';
                 locationBtn.style.transform = 'scale(1)';
             }, 200);
