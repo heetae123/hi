@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카키스케치 - 중장비 렌탈 검색</title>
+    <title>중기모여 - 중장비 렌탈 검색</title>
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/icons/icon-192.png">
@@ -78,7 +78,7 @@
 
         /* Content Wrapper */
         .content-wrapper {
-            padding-bottom: 80px;
+            padding-bottom: 50px;
         }
         
         .location-bar {
@@ -380,7 +380,7 @@
             width: 100%;
             background: white;
             border-top: 1px solid #f1f3f4;
-            padding: 8px 0 20px;
+            padding: 4px 0 6px;
             display: flex;
             justify-content: space-around;
             box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
@@ -390,7 +390,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px 12px;
+            padding: 4px 6px;
             cursor: pointer;
             transition: color 0.2s ease;
             text-decoration: none;
@@ -409,15 +409,15 @@
         }
 
         .nav-icon {
-            font-size: 18px;
-            margin-bottom: 4px;
+            font-size: 20px;
+            margin-bottom: 1px;
         }
 
         .nav-label {
             font-size: 9px;
             font-weight: 500;
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
         /* Responsive */
@@ -437,7 +437,7 @@
         <!-- Header -->
         <div class="header">
             <div class="header-top">
-                <div class="logo">카키스케치</div>
+                <div class="logo">중기모여</div>
                 <button class="location-btn" onclick="changeLocation()">
                     📍 청주시 ▼
                 </button>
@@ -447,7 +447,7 @@
 
         <div class="content-wrapper">
             <div class="location-bar">
-                <button class="location-btn" id="locationBtn">서울 / 강남구</button>
+                <button class="location-btn" id="locationBtn">전체 지역</button>
                 <button class="date-btn" id="dateBtn">07.16 (수) ~ 07.17 (목)</button>
             </div>
 
@@ -610,6 +610,12 @@
             <div class="modal-body">
                 <!-- 광역시/도 목록 -->
                 <div class="region-list" id="cityList">
+                    <div class="region-item" onclick="selectRegion('전체', '전체')">
+                        <div class="region-name">
+                            <div class="region-icon">🌍</div>
+                            <div>전체 지역</div>
+                        </div>
+                    </div>
                     <div class="region-item" onclick="showDistricts('서울')">
                         <div class="region-name">
                             <div class="region-icon">🏢</div>
@@ -814,7 +820,13 @@
         // 지역 선택
         function selectRegion(city, district) {
             const locationBtn = document.getElementById('locationBtn');
-            locationBtn.textContent = city + ' / ' + district;
+            
+            if (city === '전체' && district === '전체') {
+                locationBtn.textContent = '전체 지역';
+            } else {
+                locationBtn.textContent = city + ' / ' + district;
+            }
+            
             closeModal('locationModal');
         }
 
