@@ -1,16 +1,18 @@
-const CACHE_NAME = "kakisketch-cache-v2";
+const CACHE_NAME = "kakisketch-cache-v4";
+const BASE_PATH = "/hi";
+
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./s.html",
-  "./search.html",
-  "./mypage.html",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png"
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/index.html`,
+  `${BASE_PATH}/s.html`,
+  `${BASE_PATH}/search.html`,
+  `${BASE_PATH}/mypage.html`,
+  `${BASE_PATH}/manifest.json`,
+  `${BASE_PATH}/icons/icon-192.png`,
+  `${BASE_PATH}/icons/icon-512.png`
 ];
 
-console.log('🚀 카키스케치 Service Worker 시작');
+console.log('🚀 카키스케치 Service Worker 시작 - BASE_PATH:', BASE_PATH);
 
 // 서비스 워커 설치
 self.addEventListener("install", (event) => {
@@ -21,7 +23,7 @@ self.addEventListener("install", (event) => {
       .then((cache) => {
         console.log("✅ 캐시 오픈 완료");
         
-        // 각 URL을 개별적으로 처리하여 실패해도 계속 진행
+        // 각 URL을 개별적으로 처리
         return Promise.allSettled(
           urlsToCache.map(url => {
             return fetch(url)
@@ -80,13 +82,13 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   
-  // 같은 origin의 요청만 처리
-  if (url.origin !== self.location.origin) {
+  // 같은 origin이고 BASE_PATH로 시작하는 요청만 처리
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(BASE_PATH)) {
     return;
   }
 
   // 아이콘 파일 특별 처리
-  if (url.pathname.includes('icon-192.png') || url.pathname.includes('icon-512.png')) {
+  if (url.pathname.includes('/icons/icon-192.png') || url.pathname.includes('/icons/icon-512.png')) {
     event.respondWith(handleIconRequest(event.request));
     return;
   }
@@ -95,8 +97,8 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode === 'navigate' || 
       event.request.destination === 'document' ||
       url.pathname.endsWith('.html') ||
-      url.pathname === '/' ||
-      url.pathname.endsWith('/')) {
+      url.pathname === BASE_PATH + '/' ||
+      url.pathname === BASE_PATH) {
     
     event.respondWith(handleNavigationRequest(event.request));
     return;
@@ -106,35 +108,31 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(handleResourceRequest(event.request));
 });
 
-// 네비게이션 요청 처리 (네트워크 우선)
+// 네비게이션 요청 처리
 async function handleNavigationRequest(request) {
   try {
-    // 네트워크에서 최신 버전 시도
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
-      // 성공하면 캐시에 저장하고 반환
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());
       return networkResponse;
     }
     
-    // 네트워크 응답이 좋지 않으면 캐시에서 시도
     const cachedResponse = await caches.match(request);
     return cachedResponse || networkResponse;
     
   } catch (error) {
     console.log("🌐 네트워크 실패, 캐시에서 검색:", request.url);
     
-    // 네트워크 실패 시 캐시에서 반환
     const cachedResponse = await caches.match(request);
     
     if (cachedResponse) {
       return cachedResponse;
     }
     
-    // 캐시에도 없으면 기본 페이지 반환
-    const indexResponse = await caches.match('./index.html');
+    // 기본 페이지 반환
+    const indexResponse = await caches.match(`${BASE_PATH}/index.html`);
     return indexResponse || new Response('오프라인 상태입니다.', {
       status: 503,
       statusText: 'Service Unavailable'
@@ -142,10 +140,9 @@ async function handleNavigationRequest(request) {
   }
 }
 
-// 리소스 요청 처리 (캐시 우선)
+// 리소스 요청 처리
 async function handleResourceRequest(request) {
   try {
-    // 캐시에서 먼저 확인
     const cachedResponse = await caches.match(request);
     
     if (cachedResponse) {
@@ -163,11 +160,9 @@ async function handleResourceRequest(request) {
       return cachedResponse;
     }
     
-    // 캐시에 없으면 네트워크에서 가져오기
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
-      // 캐시에 저장
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());
     }
@@ -177,7 +172,6 @@ async function handleResourceRequest(request) {
   } catch (error) {
     console.warn("❌ 리소스 로드 실패:", request.url);
     
-    // 기본 응답 반환
     return new Response('리소스를 찾을 수 없습니다.', {
       status: 404,
       statusText: 'Not Found'
@@ -188,13 +182,11 @@ async function handleResourceRequest(request) {
 // 아이콘 요청 특별 처리
 async function handleIconRequest(request) {
   try {
-    // 캐시에서 먼저 확인
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
     
-    // 네트워크에서 시도
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE_NAME);
@@ -211,7 +203,7 @@ async function handleIconRequest(request) {
   }
 }
 
-// 기본 아이콘 생성 (SVG 방식으로 변경)
+// 기본 아이콘 생성
 function generateDefaultIcon(size) {
   const svg = `
     <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
