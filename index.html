@@ -37,7 +37,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    
     <style>
         :root {
             --primary-color: #fbbc04;
@@ -1021,16 +1020,106 @@
     </div>
 
     <script>
-        // Enhanced Service Worker with better caching
+        // GitHub Pages PWA 서비스 워커 등록
         if ('serviceWorker' in navigator) {
             window.addEventListener("load", async () => {
                 try {
-                    const registration = await navigator.serviceWorker.register("/service-worker.js");
+                    // 프로젝트 페이지의 올바른 경로로 서비스 워커 등록
+                    const registration = await navigator.serviceWorker.register("/hi/service-worker.js", {
+                        scope: "/hi/"
+                    });
+                    
                     console.log("✅ Service Worker registered:", registration.scope);
+                    
+                    // 업데이트 확인
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // 새 버전 사용 가능 알림
+                                if (confirm('새 버전이 사용 가능합니다. 업데이트하시겠습니까?')) {
+                                    newWorker.postMessage({ action: 'skipWaiting' });
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    });
+                    
                 } catch (error) {
                     console.error("❌ Service Worker registration failed:", error);
                 }
             });
+            
+            // PWA 설치 프롬프트 처리
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // 설치 버튼 표시
+                showInstallButton();
+            });
+            
+            function showInstallButton() {
+                // 이미 설치 버튼이 있으면 중복 생성 방지
+                if (document.getElementById('install-pwa-btn')) return;
+                
+                const installBtn = document.createElement('button');
+                installBtn.id = 'install-pwa-btn';
+                installBtn.innerHTML = '📱 앱 설치';
+                installBtn.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    right: 20px;
+                    background: #fbbc04;
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    font-size: 14px;
+                    box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4);
+                    cursor: pointer;
+                    z-index: 1000;
+                    animation: slideUp 0.3s ease;
+                `;
+                
+                installBtn.onclick = async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        
+                        if (outcome === 'accepted') {
+                            console.log('✅ PWA 설치 완료');
+                        }
+                        
+                        deferredPrompt = null;
+                        installBtn.remove();
+                    }
+                };
+                
+                document.body.appendChild(installBtn);
+            }
+            
+            // 앱 설치 완료 감지
+            window.addEventListener('appinstalled', () => {
+                console.log('🎉 PWA가 설치되었습니다!');
+                const installBtn = document.getElementById('install-pwa-btn');
+                if (installBtn) installBtn.remove();
+            });
+        }
+
+        // CSS 애니메이션 추가
+        if (!document.getElementById('pwa-styles')) {
+            const style = document.createElement('style');
+            style.id = 'pwa-styles';
+            style.textContent = `
+                @keyframes slideUp {
+                    from { transform: translateY(100px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
         }
 
         // Enhanced navigation with loading states
