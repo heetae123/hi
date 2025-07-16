@@ -1,28 +1,42 @@
 {
   "name": "카키스케치 - 중장비 렌탈 플랫폼",
   "short_name": "카키스케치",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#fbbc04",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "./",
   "lang": "ko",
   "description": "중장비 렌탈의 새로운 기준, 카키스케치",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["business", "productivity"],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "견적받기",
+      "short_name": "견적",
+      "description": "빠른 견적 요청",
+      "url": "./search.html",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }

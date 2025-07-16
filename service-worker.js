@@ -1,146 +1,249 @@
-const CACHE_NAME = "kakisketch-cache-v1";
+const CACHE_NAME = "kakisketch-cache-v2";
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/s.html",
-  "/search.html",
-  "/mypage.html",
-  "/manifest.json",
-  "icons/icon-192.png",
-  "icons/icon-512.png"
+  "./",
+  "./index.html",
+  "./s.html",
+  "./search.html",
+  "./mypage.html",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
+
+console.log('🚀 카키스케치 Service Worker 시작');
 
 // 서비스 워커 설치
 self.addEventListener("install", (event) => {
-  console.log("Service Worker installing...");
+  console.log("📦 Service Worker 설치 중...");
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log("Opened cache and caching files");
-        // 각 파일을 개별적으로 캐시하여 실패한 파일이 있어도 계속 진행
+        console.log("✅ 캐시 오픈 완료");
+        
+        // 각 URL을 개별적으로 처리하여 실패해도 계속 진행
         return Promise.allSettled(
-          urlsToCache.map(url => 
-            cache.add(url).catch(err => {
-              console.warn(`캐시 실패: ${url}`, err);
-              return null;
-            })
-          )
-        );
+          urlsToCache.map(url => {
+            return fetch(url)
+              .then(response => {
+                if (response.ok) {
+                  console.log(`✅ 캐시 성공: ${url}`);
+                  return cache.put(url, response);
+                } else {
+                  console.warn(`⚠️ 응답 실패 (${response.status}): ${url}`);
+                  return null;
+                }
+              })
+              .catch(err => {
+                console.warn(`❌ 네트워크 오류: ${url}`, err);
+                return null;
+              });
+          })
+        ).then(results => {
+          const successful = results.filter(r => r.status === 'fulfilled').length;
+          console.log(`✅ ${successful}/${urlsToCache.length} 파일 캐시 완료`);
+        });
       })
       .catch((err) => {
-        console.error("캐시 오픈 실패:", err);
+        console.error("❌ 캐시 오픈 실패:", err);
       })
   );
-  // 새로운 서비스 워커를 즉시 활성화
+  
+  // 즉시 활성화
   self.skipWaiting();
 });
 
 // 서비스 워커 활성화
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker activating...");
-  const cacheWhitelist = [CACHE_NAME];
+  console.log("🔄 Service Worker 활성화 중...");
   
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log("이전 캐시 삭제:", cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      // 모든 클라이언트에 대해 서비스 워커 제어권 획득
-      return self.clients.claim();
-    })
+    Promise.all([
+      // 이전 캐시 삭제
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log("🗑️ 이전 캐시 삭제:", cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // 모든 클라이언트 제어
+      self.clients.claim()
+    ])
   );
 });
 
-// 네트워크 요청 가로채기
+// 네트워크 요청 처리
 self.addEventListener("fetch", (event) => {
-  // 아이콘 요청 처리
-  if (event.request.url.includes('/icon-192') || event.request.url.includes('/icon-512')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          if (response.ok) {
-            return response;
-          }
-          // 아이콘 파일이 없을 경우 기본 아이콘 생성
-          return generateDefaultIcon(event.request.url.includes('512') ? 512 : 192);
-        })
-        .catch(() => {
-          return generateDefaultIcon(event.request.url.includes('512') ? 512 : 192);
-        })
-    );
+  const url = new URL(event.request.url);
+  
+  // 같은 origin의 요청만 처리
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // 캐시에 있으면 캐시된 버전 반환
-        if (response) {
-          return response;
-        }
-        
-        // 캐시에 없으면 네트워크에서 가져오기
-        return fetch(event.request)
-          .then((response) => {
-            // 유효한 응답이 아니면 그대로 반환
-            if (!response || response.status !== 200 || response.type !== "basic") {
-              return response;
-            }
-            
-            // 응답을 복사하여 캐시에 저장
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-            
-            return response;
-          });
-      })
-      .catch(() => {
-        // 네트워크 실패 시 기본 페이지 반환
-        if (event.request.destination === "document") {
-          return caches.match("/index.html");
-        }
-      })
-  );
+  // 아이콘 파일 특별 처리
+  if (url.pathname.includes('icon-192.png') || url.pathname.includes('icon-512.png')) {
+    event.respondWith(handleIconRequest(event.request));
+    return;
+  }
+
+  // HTML 페이지는 네트워크 우선
+  if (event.request.mode === 'navigate' || 
+      event.request.destination === 'document' ||
+      url.pathname.endsWith('.html') ||
+      url.pathname === '/' ||
+      url.pathname.endsWith('/')) {
+    
+    event.respondWith(handleNavigationRequest(event.request));
+    return;
+  }
+
+  // 기타 리소스는 캐시 우선
+  event.respondWith(handleResourceRequest(event.request));
 });
 
-// 기본 아이콘 생성 함수
-function generateDefaultIcon(size) {
-  const canvas = new OffscreenCanvas(size, size);
-  const ctx = canvas.getContext('2d');
-  
-  // 배경 그라데이션
-  const gradient = ctx.createLinearGradient(0, 0, size, size);
-  gradient.addColorStop(0, '#fbbc04');
-  gradient.addColorStop(1, '#e0a800');
-  
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-  
-  // 둥근 모서리
-  ctx.globalCompositeOperation = 'destination-in';
-  ctx.beginPath();
-  ctx.roundRect(0, 0, size, size, size * 0.2);
-  ctx.fill();
-  
-  // 텍스트 추가
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.fillStyle = 'white';
-  ctx.font = `bold ${size * 0.4}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('K', size/2, size/2);
-  
-  return canvas.convertToBlob({ type: 'image/png' })
-    .then(blob => new Response(blob, {
-      headers: { 'Content-Type': 'image/png' }
-    }));
+// 네비게이션 요청 처리 (네트워크 우선)
+async function handleNavigationRequest(request) {
+  try {
+    // 네트워크에서 최신 버전 시도
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      // 성공하면 캐시에 저장하고 반환
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+      return networkResponse;
+    }
+    
+    // 네트워크 응답이 좋지 않으면 캐시에서 시도
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || networkResponse;
+    
+  } catch (error) {
+    console.log("🌐 네트워크 실패, 캐시에서 검색:", request.url);
+    
+    // 네트워크 실패 시 캐시에서 반환
+    const cachedResponse = await caches.match(request);
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // 캐시에도 없으면 기본 페이지 반환
+    const indexResponse = await caches.match('./index.html');
+    return indexResponse || new Response('오프라인 상태입니다.', {
+      status: 503,
+      statusText: 'Service Unavailable'
+    });
+  }
 }
+
+// 리소스 요청 처리 (캐시 우선)
+async function handleResourceRequest(request) {
+  try {
+    // 캐시에서 먼저 확인
+    const cachedResponse = await caches.match(request);
+    
+    if (cachedResponse) {
+      // 백그라운드에서 업데이트
+      fetch(request).then(response => {
+        if (response.ok) {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, response);
+          });
+        }
+      }).catch(() => {
+        // 백그라운드 업데이트 실패는 무시
+      });
+      
+      return cachedResponse;
+    }
+    
+    // 캐시에 없으면 네트워크에서 가져오기
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      // 캐시에 저장
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+    
+  } catch (error) {
+    console.warn("❌ 리소스 로드 실패:", request.url);
+    
+    // 기본 응답 반환
+    return new Response('리소스를 찾을 수 없습니다.', {
+      status: 404,
+      statusText: 'Not Found'
+    });
+  }
+}
+
+// 아이콘 요청 특별 처리
+async function handleIconRequest(request) {
+  try {
+    // 캐시에서 먼저 확인
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // 네트워크에서 시도
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+      return networkResponse;
+    }
+    
+    // 아이콘이 없으면 기본 아이콘 생성
+    return generateDefaultIcon(request.url.includes('512') ? 512 : 192);
+    
+  } catch (error) {
+    // 오류 시 기본 아이콘 생성
+    return generateDefaultIcon(request.url.includes('512') ? 512 : 192);
+  }
+}
+
+// 기본 아이콘 생성 (SVG 방식으로 변경)
+function generateDefaultIcon(size) {
+  const svg = `
+    <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#fbbc04;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#e0a800;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="${size}" height="${size}" rx="${size * 0.2}" fill="url(#grad)"/>
+      <text x="50%" y="50%" text-anchor="middle" dy="0.35em" 
+            font-family="Arial, sans-serif" font-size="${size * 0.4}" 
+            font-weight="bold" fill="white">K</text>
+    </svg>
+  `;
+  
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  return new Response(blob, {
+    headers: {
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': 'public, max-age=86400'
+    }
+  });
+}
+
+// 메시지 처리
+self.addEventListener('message', (event) => {
+  console.log('💬 메시지 수신:', event.data);
+  
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
+
+console.log("✅ 카키스케치 GitHub Pages PWA Service Worker 로드 완료!");
